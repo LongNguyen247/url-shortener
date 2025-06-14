@@ -1,8 +1,14 @@
-from flask import Flask, request, redirect, render_template
-import string, random, sqlite3
+import sqlite3
+import random
+import string
+import os
+from flask import Flask, request, redirect, render_template_string, flash
 
+# --- Configuration Management: Get DB path from environment variable or default ---
+# Set a secret key for flash messages 
 app = Flask(__name__)
-DB = 'urls.db'
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'a_very_secret_key_for_dev_only')
+DB = os.environ.get('DATABASE_URL', 'urls.db')
 
 # Setup DB
 def init_db():
