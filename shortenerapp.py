@@ -10,19 +10,26 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'a_very_secret_key_for_dev_only')
 DB = os.environ.get('DATABASE_URL', 'urls.db')
 
-# Setup DB
+# --- Helper function to initialize the database ---
 def init_db():
-    conn = sqlite3.connect(DB)
-    c = conn.cursor()
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS urls (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            short TEXT UNIQUE,
-            long TEXT
-        )
-    """)
-    conn.commit()
-    conn.close()
+    conn = None
+    try:
+        conn = sqlite3.connect(DB)
+        c = conn.cursor()
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS urls (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                short TEXT UNIQUE NOT NULL,
+                long TEXT NOT NULL
+            )
+        ''')
+        conn.commit()
+        print(f"Database initialized at {DB}")
+    except sqlite3.Error as e:
+        print(f"ERROR: Database initialization failed: {e}")
+    finally:
+        if conn:
+            conn.close()
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
