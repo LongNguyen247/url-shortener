@@ -81,18 +81,55 @@ FORM_HTML = '''
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        long_url = request.form['long_url']
-        short = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
-        conn = sqlite3.connect(DB)
-        c = conn.cursor()
-        c.execute("INSERT INTO urls (short, long) VALUES (?, ?)", (short, long_url))
-        conn.commit()
-        conn.close()
-        return f"Short URL: <a href='/{short}'>localhost:5000/{short}</a>"
-    return '''<form method="post">
-                Long URL: <input name="long_url">
-                <input type="submit">
-              </form>'''
+        long_url = request.form.get('long_url')
+
+        # --- Input Validation ---
+        if not long_url:
+            flash('Please enter a URL to shorten.', 'error')
+            return render_template_string(FORM_HTML)
+        # Simple validation: checks if it starts with http(s)://
+        if not (long_url.startswith('http://') or long_url.startswith('https://')):
+            flash('Please enter a valid URL starting with http:// or https://.', 'error')
+            return render_template_string(FORM_HTML)
+
+        short = None
+        MAX_RETRIES = 5  # Max attempts to find a unique short code
+        for _ in range(MAX_RETRIES):
+            potential_short = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
+            try:
+                # --- Short Code Collision Handling (Check for existing code) ---
+                with sqlite3.connect(DB) as conn:
+                    c = conn.cursor()
+                    c.execute("SELECT 1 FROM urls WHERE short = ?", (potential_short,))
+                    if not c.fetchone():  # If the short code does not exist
+                        short = potential_short
+                        break # Found a unique code, exit loop
+            except sqlite3.Error as e:
+                flash(f"An internal database error occurred while checking short code uniqueness: {e}", 'error')
+                return render_template_string(FORM_HTML)
+
+        if not short:
+            flash("Failed to generate a unique short URL. Please try again.", 'error')
+            return render_template_string(FORM_HTML)
+
+        try:
+            # --- Database Insertion with Error Handling ---
+            with sqlite3.connect(DB) as conn:
+                c = conn.cursor()
+                c.execute("INSERT INTO urls (short, long) VALUES (?, ?)", (short, long_url))
+                conn.commit()
+            # --- User Feedback (Flash Message) ---
+            flash(f"Short URL created: <a href='/{short}'>http://localhost:5000/{short}</a>", 'success')
+            return redirect('/') # Redirect to clear the form and display messages
+        except sqlite3.IntegrityError:
+            # This specific error might occur if two requests try to insert the same short code concurrently
+            flash("A URL with this short code already exists. Please try again.", 'error')
+            return render_template_string(FORM_HTML)
+        except sqlite3.Error as e:
+            flash(f"An internal database error occurred: {e}", 'error')
+            return render_template_string(FORM_HTML)
+
+    return render_template_string(FORM_HTML)
 
 @app.route('/<short>')
 def redirect_short(short):
