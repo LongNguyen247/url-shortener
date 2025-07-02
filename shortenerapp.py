@@ -10,7 +10,7 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'a_very_secret_key_for_dev_only')
 DB = os.environ.get('DATABASE_URL', 'urls.db')
 
-# --- Helper function to initialize the database ---
+# --- Helper function to initialise the database ---
 def init_db():
     conn = None
     try:
@@ -78,6 +78,7 @@ FORM_HTML = '''
 </html>
 '''
 
+# --- Route 1: Main Page (URL Shortening Form) ---
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -131,6 +132,7 @@ def index():
 
     return render_template_string(FORM_HTML)
 
+# --- Route 2: Short URL Redirection ---
 @app.route('/<short>')
 def redirect_short(short):
     try:
@@ -188,6 +190,7 @@ def redirect_short(short):
             </html>
         '''), 500
 
+# --- Main Execution Block ---
 if __name__ == '__main__':
     init_db()
     # In a production environment, debug should be False
