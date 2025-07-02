@@ -201,11 +201,12 @@ You can configure the following aspects using environment variables:
 
 ## Project Structure
 
-*.
-*├── shortenerapp.py     # Main Flask application file
-*├── urls.db             # Default SQLite database file (created on first run)
-*└── README.md           # This file
-
+```
+.
+├── shortenerapp.py     # Main Flask application file
+├── urls.db             # Default SQLite database file (created on first run)
+└── README.md           # This file
+```
 
 ## Code Overview
 
