@@ -133,15 +133,63 @@ def index():
 
 @app.route('/<short>')
 def redirect_short(short):
-    conn = sqlite3.connect(DB)
-    c = conn.cursor()
-    c.execute("SELECT long FROM urls WHERE short = ?", (short,))
-    result = c.fetchone()
-    conn.close()
-    if result:
-        return redirect(result[0])
-    return "URL not found", 404
+    try:
+        # --- Database Lookup with Error Handling ---
+        with sqlite3.connect(DB) as conn:
+            c = conn.cursor()
+            c.execute("SELECT long FROM urls WHERE short = ?", (short,))
+            result = c.fetchone()
+
+        if result:
+            return redirect(result[0])
+        else:
+            # --- Improved 404 Page ---
+            return render_template_string('''
+                <!doctype html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>URL Not Found</title>
+                    <style>
+                        body { font-family: sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center; }
+                        h1 { color: #dc3545; }
+                        p { color: #6c757d; }
+                        a { color: #007bff; text-decoration: none; }
+                        a:hover { text-decoration: underline; }
+                    </style>
+                </head>
+                <body>
+                    <h1>404 - URL Not Found</h1>
+                    <p>The short URL you entered does not exist or has expired.</p>
+                    <p><a href='/'>Go back to shorten a new URL</a></p>
+                </body>
+                </html>
+            '''), 404
+    except sqlite3.Error as e:
+        print(f"ERROR: Database error during redirection for short code '{short}': {e}")
+        return render_template_string('''
+            <!doctype html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Internal Server Error</title>
+                <style>
+                    body { font-family: sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center; }
+                    h1 { color: #dc3545; }
+                    p { color: #6c757d; }
+                </style>
+            </head>
+            <body>
+                <h1>500 - Internal Server Error</h1>
+                <p>An unexpected error occurred. Please try again later.</p>
+            </body>
+            </html>
+        '''), 500
 
 if __name__ == '__main__':
     init_db()
+    # In a production environment, debug should be False
+    # and you would use a production-ready WSGI server like Gunicorn or uWSGI
     app.run(debug=True)
