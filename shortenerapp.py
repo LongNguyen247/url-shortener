@@ -193,6 +193,6 @@ def redirect_short(short):
 # --- Main Execution Block ---
 if __name__ == '__main__':
     init_db()
-    # In a production environment, debug should be False
+    # In a production environment, debug should be False  
     # and you would use a production-ready WSGI server like Gunicorn or uWSGI
     app.run(debug=True)
