@@ -217,15 +217,15 @@ This section briefly explains the purpose of the main components within `shorten
 * **`DB`**: Defines the path where the SQLite database file (`urls.db` by default) is stored.
 * **`init_db()`**: A helper function executed at startup to ensure the `urls` table exists in the SQLite database, creating it if necessary.
 * **`FORM_HTML`**: A multi-line string containing the complete HTML template for the main page, encompassing the URL input form and the display area for flash messages (success/error).
-* **`@app.route('/', methods=['GET', 'POST'])`**: This decorator defines the behavior for the application's root URL.
+* **`@app.route('/', methods=['GET', 'POST'])`**: This decorator defines the behaviour for the application's root URL.
     * **`GET` Request Handling**: When a user first navigates to the root URL (e.g., `http://localhost:5000/`), this part of the code renders and displays the `FORM_HTML` for URL input.
     * **`POST` Request Handling**: When the user submits the form with a long URL, this section processes the request:
         * **Input Validation**: Checks if the entered URL is valid (not empty, starts with `http://` or `https://`).
         * **Short Code Generation & Uniqueness Check**: Generates a random 6-character code and queries the database to ensure it's unique before attempting to save.
         * **Database Insertion**: Stores the `short` code and `long` URL pair into the `urls` table in the SQLite database.
-        * **User Feedback**: Utilizes Flask's `flash()` mechanism to display informative success or error messages to the user.
+        * **User Feedback**: Utilises Flask's `flash()` mechanism to display informative success or error messages to the user.
         * **Redirection**: After processing a `POST` request, it redirects the user back to the root (`/`) to clear the form and display the flash message.
-* **`@app.route('/<short>')`**: This decorator defines the behavior for accessing a shortened URL (e.g., `http://localhost:5000/xyz123`).
+* **`@app.route('/<short>')`**: This decorator defines the behaviour for accessing a shortened URL (e.g., `http://localhost:5000/xyz123`).
     * **URL Parameter Capture**: The `<short>` syntax captures the 6-character code from the URL path and passes it as an argument to the `redirect_short` function.
     * **Database Lookup**: Queries the `urls` table to find the original `long` URL associated with the captured `short` code.
     * **Redirection**: If a matching `long` URL is found in the database, the user's browser is immediately redirected to that original URL using Flask's `redirect()` function.
@@ -243,13 +243,9 @@ This section briefly explains the purpose of the main components within `shorten
 * **Dockerization:** Package the application in a Docker container for easier deployment.
 * **Frontend Framework:** Use a JavaScript framework (e.g., React, Vue) for a more interactive UI.
 * **Deployment:** Instructions for deploying to platforms like Heroku, Render, Vercel, etc.
-* **Rate Limiting:** Implement a mechanism to prevent abuse (e.g., too many shorten requests from one IP).
+* **Rate Limiting:** Implement a mechanism to prevent abuse (e.g., too many shortened requests from one IP).
 * **Advanced Validation:** Use a more robust URL validation library.
 
 ## Contributing
 
 Feel free to fork the repository, open issues, and submit pull requests.
-
-## License
-
-This project is open source and available under the [MIT License](LICENSE). *(You'll need to create a LICENSE file if you haven't already).*
