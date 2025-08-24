@@ -13,7 +13,7 @@ DB = os.environ.get('DATABASE_URL', 'urls.db')
 # --- Helper function to initialise the database ---
 def init_db():
     conn = None
-    try:
+    try:    
         conn = sqlite3.connect(DB)
         c = conn.cursor()
         c.execute('''
