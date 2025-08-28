@@ -8,12 +8,12 @@ from flask import Flask, request, redirect, render_template_string, flash
 # Set a secret key for flash messages 
 app = Flask(__name__)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'a_very_secret_key_for_dev_only')
-DB = os.environ.get('DATABASE_URL', 'urls.db')
+DB = os.environ.get('DATABASE_URL', 'urls.db')  
 
 # --- Helper function to initialise the database ---
 def init_db():
     conn = None
-    try:    
+    try:      
         conn = sqlite3.connect(DB)
         c = conn.cursor()
         c.execute('''
